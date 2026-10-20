@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}A better way to evaluate performance{% endblock %}
+{% block public_content %}
+<main class="landing">
+  <div class="landing-glow landing-glow-one"></div><div class="landing-glow landing-glow-two"></div>
+  <div class="landing-grid">
+    <section class="landing-copy">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> AMBO UNIVERSITY · PERFORMANCE & QUALITY</div>
+      <h1>Make every evaluation a step toward <em>excellence.</em></h1>
+      <p class="landing-lead">A unified, thoughtful workspace for academic evaluation, six-month administrative reviews, structured feedback and evidence-based performance reports.</p>
+      <div class="landing-actions"><a class="button button-primary button-large" href="{% url 'signup' %}">Get started <span>→</span></a><a class="button button-quiet button-large" href="{% url 'login' %}">Sign in to workspace</a></div>
+      <div class="landing-proof"><span class="proof-check">✓</span><span>Structured forms</span><span class="proof-separator">·</span><span>Weighted scoring</span><span class="proof-separator">·</span><span>Excel reporting</span></div>
+      <div class="brand-motto"><span></span><div><strong>Learning for change</strong><small>Academic excellence · Research · Community service</small></div></div>
+    </section>
+    <section class="landing-visual" aria-label="System feature preview">
+      <div class="preview-window">
+        <div class="preview-header"><div class="preview-dots"><b></b><b></b><b></b></div><span>Performance overview</span><span class="preview-live"><i></i> Workspace</span></div>
+        <div class="preview-body">
+          <div class="preview-title-row"><div><small>ACADEMIC YEAR · 2018 E.C.</small><h3>Evaluation dashboard</h3></div><span class="preview-chip">Summary E</span></div>
+          <div class="preview-stat-grid"><div class="preview-stat"><small>Evaluations</small><strong>128</strong><span class="stat-up">↑ structured records</span></div><div class="preview-stat"><small>Avg. rating</small><strong>4.4<span>/5</span></strong><div class="mini-stars">★★★★★</div></div></div>
+          <div class="preview-chart-card"><div class="chart-heading"><strong>Evaluations by group</strong><small>Sample layout</small></div><div class="bars"><div class="bar-col"><span style="height:73%"></span><small>Students</small></div><div class="bar-col amber-bar"><span style="height:54%"></span><small>Head</small></div><div class="bar-col purple-bar"><span style="height:37%"></span><small>Peer</small></div><div class="bar-col green-bar"><span style="height:29%"></span><small>Self</small></div></div><div class="preview-legend"><span><i class="dot-blue"></i> 40%</span><span><i class="dot-amber"></i> 35%</span><span><i class="dot-purple"></i> 15%</span><span><i class="dot-green"></i> 10%</span></div></div>
+          <div class="preview-record"><span class="record-avatar">AU</span><div><strong>Performance summary</strong><small>Four evaluator groups · one consolidated view</small></div><span class="record-arrow">↗</span></div>
+        </div>
+      </div>
+      <div class="floating-note note-top"><span class="note-icon">✓</span><span><strong>Structured</strong><small>Form A–E workflow</small></span></div>
+      <div class="floating-note note-bottom"><span class="note-icon note-icon-gold">↧</span><span><strong>Excel-ready</strong><small>Formatted reports</small></span></div>
+      <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+    </section>
+  </div>
+  <section class="feature-strip"><div class="feature-item"><span class="feature-icon">▤</span><div><strong>Four academic evaluator groups</strong><small>Students, department heads, peers and self-assessment</small></div></div><div class="feature-item"><span class="feature-icon feature-icon-gold">◷</span><div><strong>Six-month administrative form</strong><small>Amharic summary with weighted score / 100</small></div></div><div class="feature-item"><span class="feature-icon feature-icon-purple">▥</span><div><strong>Reports & exports</strong><small>Filters, printable records and Excel workbooks</small></div></div></section>
+</main>
+{% endblock %}
