@@ -1,0 +1,104 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard | StaffEval{% endblock %}
+{% block page_heading %}Overview{% endblock %}
+
+{% block content %}
+<section class="welcome-row">
+    <div>
+        <h1>Welcome, {{ user.first_name|default:user.username }} 👋</h1>
+        <p class="muted">
+            Here is an overview of the staff evaluation system.
+        </p>
+    <a class="button button-primary"
+   href="{% url 'evaluations:create_academic_evaluation' %}">
+    + New Academic Evaluation
+</a>
+    </div>
+    <span class="status-pill">● System active</span>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Active Staff</span>
+            <span class="stat-icon blue">♙</span>
+        </div>
+        <strong>{{ staff_count }}</strong>
+        <small>Registered active staff members</small>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Open Evaluation Cycles</span>
+            <span class="stat-icon green">◷</span>
+        </div>
+        <strong>{{ open_cycles }}</strong>
+        <small>Cycles currently marked open</small>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Evaluation Records</span>
+            <span class="stat-icon purple">▤</span>
+        </div>
+        <strong>{{ submission_count }}</strong>
+        <small>All recorded submissions</small>
+    </article>
+</section>
+
+<section class="content-card">
+    <div class="section-heading">
+        <div>
+            <h2>My Evaluation Activity</h2>
+            <p class="muted">Your most recent evaluation submissions.</p>
+        </div>
+        <a class="text-link" href="/admin/">Manage records ↗</a>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Staff member</th>
+                    <th>Evaluation cycle</th>
+                    <th>Evaluator type</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in my_submissions %}
+                <tr>
+                    <td>
+                        <strong>
+                            {{ item.staff_member.user.get_full_name|default:item.staff_member.user.username }}
+                        </strong>
+                        <small class="table-subtitle">
+                            {{ item.staff_member.employee_id }}
+                        </small>
+                    </td>
+                    <td>{{ item.cycle.name }}</td>
+                    <td>{{ item.get_evaluator_type_display }}</td>
+                    <td>
+                        <span class="table-status">
+                            {{ item.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ item.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        No evaluation submissions yet.
+                        Evaluation records will appear here when created.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

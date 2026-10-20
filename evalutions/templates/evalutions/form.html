@@ -1,0 +1,99 @@
+
+{% extends "base.html" %}
+
+{% block title %}Academic Evaluation | StaffEval{% endblock %}
+{% block page_heading %}Academic Evaluation{% endblock %}
+
+{% block content %}
+<section class="content-card evaluation-card">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">PERFORMANCE ASSESSMENT</span>
+            <h2>Academic Staff Evaluation</h2>
+            <p class="muted">
+                Complete the evaluation honestly and submit your responses.
+            </p>
+        </div>
+    </div>
+
+    <form method="post" class="evaluation-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-message">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="evaluation-meta">
+            <div class="field">
+                <label for="{{ form.staff_member.id_for_label }}">
+                    Staff member
+                </label>
+                {{ form.staff_member }}
+                {{ form.staff_member.errors }}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.cycle.id_for_label }}">
+                    Evaluation cycle
+                </label>
+                {{ form.cycle }}
+                {{ form.cycle.errors }}
+            </div>
+        </div>
+
+        <div class="rating-guide">
+            <strong>Rating guide</strong>
+            <p>
+                5 = Excellent · 4 = Very Good · 3 = Good ·
+                2 = Fair · 1 = Poor · 0 = Not demonstrated ·
+                NA = Not applicable
+            </p>
+        </div>
+
+        {% for field in form %}
+            {% if field.name|slice:":9" == "question_" %}
+                <article class="question-card">
+                    <div class="question-text">
+                        <span class="question-number">{{ forloop.counter }}</span>
+                        <div>
+                            <label>{{ field.label }}</label>
+                            {% if field.errors %}
+                                <div class="error-message">
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="rating-options">
+                        {{ field }}
+                    </div>
+                </article>
+            {% endif %}
+        {% endfor %}
+
+        <div class="field">
+            <label for="{{ form.strengths.id_for_label }}">
+                Strengths
+            </label>
+            {{ form.strengths }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.improvement_points.id_for_label }}">
+                Suggested improvements
+            </label>
+            {{ form.improvement_points }}
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'evaluations:dashboard' %}"
+               class="button button-outline">Cancel</a>
+            <button type="submit" class="button button-primary">
+                Submit Evaluation →
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}
