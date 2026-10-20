@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}Evaluation workspace{% endblock %} · Ambo University</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script defer src="{% static 'js/app.js' %}"></script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{% url 'dashboard' %}">
+      <span class="brand-mark">AU</span><span class="brand-copy"><strong>Ambo University</strong><small>Performance workspace</small></span>
+    </a>
+    <div class="nav-caption">WORKSPACE</div>
+    <nav class="side-nav" aria-label="Main navigation">
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span class="nav-icon">◫</span>Dashboard</a>
+      {% if current_role == 'student' or user.is_superuser %}<a href="{% url 'evaluation_create' 'student' %}" class="nav-link"><span class="nav-icon">✎</span>Student evaluation <span class="nav-kicker">A</span></a>{% endif %}
+      {% if current_role == 'department_head' or current_role == 'committee' or user.is_superuser %}<a href="{% url 'evaluation_create' 'department_head' %}" class="nav-link"><span class="nav-icon">▤</span>Department head <span class="nav-kicker">B</span></a>{% endif %}
+      {% if current_role == 'peer' or current_role == 'department_head' or current_role == 'committee' or user.is_superuser %}<a href="{% url 'evaluation_create' 'peer' %}" class="nav-link"><span class="nav-icon">◎</span>Peer evaluation <span class="nav-kicker">C</span></a>{% endif %}
+      {% if current_role == 'instructor' or user.is_superuser %}<a href="{% url 'evaluation_create' 'self' %}" class="nav-link"><span class="nav-icon">♧</span>Self-evaluation <span class="nav-kicker">D</span></a>{% endif %}
+      <a href="{% url 'evaluation_list' %}" class="nav-link {% if request.resolver_match.url_name == 'evaluation_list' %}active{% endif %}"><span class="nav-icon">☷</span>Academic records</a>
+      <a href="{% url 'evaluation_summary' %}" class="nav-link {% if request.resolver_match.url_name == 'evaluation_summary' %}active{% endif %}"><span class="nav-icon">▥</span>Summary report <span class="nav-kicker">E</span></a>
+      <div class="nav-caption nav-caption-gap">ADMINISTRATIVE</div>
+      {% if current_role == 'department_head' or current_role == 'committee' or current_role == 'college_admin' or user.is_superuser %}
+        <a href="{% url 'administrative_create' %}" class="nav-link"><span class="nav-icon">▦</span>6-month evaluation</a>
+      {% endif %}
+      <a href="{% url 'administrative_list' %}" class="nav-link {% if request.resolver_match.url_name == 'administrative_list' %}active{% endif %}"><span class="nav-icon">▧</span>Administrative records</a>
+      {% if current_role == 'department_head' or current_role == 'committee' or current_role == 'college_admin' or current_role == 'dean' or current_role == 'academic_vp' or current_role == 'archivist' or current_role == 'office_directorate' or user.is_superuser %}<a href="{% url 'archive_list' %}" class="nav-link {% if request.resolver_match.url_name == 'archive_list' %}active{% endif %}"><span class="nav-icon">▤</span>Archive register</a>{% endif %}
+      <a href="{% url 'staff_list' %}" class="nav-link {% if request.resolver_match.url_name == 'staff_list' %}active{% endif %}"><span class="nav-icon">♙</span>Staff directory</a>
+      {% if user.is_superuser %}<a href="/admin/" class="nav-link"><span class="nav-icon">⚙</span>Django administration <span class="external">↗</span></a>{% endif %}
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="support-card"><div class="support-icon">✦</div><strong>Make evaluation count</strong><p>Fair feedback supports growth, quality teaching and better service.</p></div>
+      <div class="side-user"><div class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</div><div class="side-user-info"><strong>{{ user.get_full_name|default:user.username }}</strong><small>{{ current_role_display|default:current_role|title }}</small></div><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="icon-button logout-button" title="Sign out" aria-label="Sign out">⇥</button></form></div>
+    </div>
+  </aside>
+  <main class="main-panel">
+    <header class="topbar">
+      <button id="sidebarToggle" class="icon-button mobile-menu" aria-label="Toggle navigation">☰</button>
+      <div class="breadcrumb"><span>Ambo University</span><span class="crumb-dot">/</span><strong>{% block page_heading %}Workspace{% endblock %}</strong></div>
+      <div class="topbar-actions"><span class="role-pill">{{ current_role|title|default:"User" }}</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode"><span class="theme-symbol">◐</span><span class="theme-label">Dark mode</span></button></div>
+    </header>
+    <section class="page-content">
+      {% if messages %}<div class="messages">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}"><span>{{ message }}</span><button type="button" class="alert-close" aria-label="Dismiss">×</button></div>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+      <footer class="page-footer"><span>Ambo University · Academic & Administrative Performance Evaluation</span><span>Learning for change</span></footer>
+    </section>
+  </main>
+</div>
+{% else %}
+<div class="public-layout">
+  <header class="public-nav"><a class="brand" href="{% url 'home' %}"><span class="brand-mark">AU</span><span class="brand-copy"><strong>Ambo University</strong><small>Performance workspace</small></span></a><div class="public-actions"><button id="themeToggle" class="theme-toggle" type="button"><span class="theme-symbol">◐</span><span class="theme-label">Dark mode</span></button><a href="{% url 'login' %}" class="text-link">Sign in</a><a href="{% url 'signup' %}" class="button button-primary button-small">Create account <span>→</span></a></div></header>
+  {% if messages %}<div class="public-messages">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+  {% block public_content %}{% endblock %}
+  <footer class="public-footer">Ambo University · Academic & Administrative Performance Evaluation</footer>
+</div>
+{% endif %}
+</body>
+</html>
