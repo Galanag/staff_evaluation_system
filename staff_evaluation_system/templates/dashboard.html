@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-intro intro-row"><div><div class="eyebrow eyebrow-muted"><span class="eyebrow-dot"></span> PERFORMANCE OVERVIEW</div><h1>Welcome back, {{ user.first_name|default:user.username }}.</h1><p>Here's what's happening across your evaluation workspace.</p></div><div class="intro-actions"><span class="date-chip">◷ {{ today|date:"M d, Y" }}</span>{% if can_administer %}<a class="button button-primary" href="{% url 'administrative_create' %}">+ New 6-month review</a>{% endif %}</div></div>
+
+<!-- Statistic Cards -->
+<div class="stat-grid stat-grid-four">
+  <article class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon-wrapper"><span class="stat-icon icon-navy">●</span></div>
+      <span class="stat-tag">TOTAL EMPLOYEES</span>
+    </div>
+    <div class="stat-number">{{ staff_count }}</div>
+    <div class="stat-label">Active staff members in directory</div>
+    <div class="stat-foot">Institutional people directory</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon-wrapper"><span class="stat-icon icon-teal">▲</span></div>
+      <span class="stat-tag">ACTIVE PERIODS</span>
+    </div>
+    <div class="stat-number">{{ active_periods_count }}</div>
+    <div class="stat-label">Current evaluation periods</div>
+    <div class="stat-foot">Ongoing and recently completed</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon-wrapper"><span class="stat-icon icon-gold">★</span></div>
+      <span class="stat-tag">COMPLETED EVALS</span>
+    </div>
+    <div class="stat-number">{{ completed_evaluations_count }}</div>
+    <div class="stat-label">Submitted evaluation records</div>
+    <div class="stat-foot">Academic and administrative forms</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon-wrapper"><span class="stat-icon icon-purple">◈</span></div>
+      <span class="stat-tag">DEPARTMENTS</span>
+    </div>
+    <div class="stat-number">{{ departments_count }}</div>
+    <div class="stat-label">University departments</div>
+    <div class="stat-foot">Faculty and administrative units</div>
+  </article>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+
+  <!-- Evaluation Activity Chart -->
+  <section class="panel chart-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Evaluation activity</h2>
+        <p>Submitted academic forms by evaluator group</p>
+      </div>
+      <a href="{% url 'evaluation_list' %}" class="text-link">View records <span>→</span></a>
+    </div>
+    <div class="chart-content">
+      <div class="chart-y-labels">
+        <span>More</span><span>Activity</span><span>Less</span>
+      </div>
+      <div class="chart-area">
+        <div class="chart-grid-lines">
+          <i></i><i></i><i></i><i></i>
+        </div>
+        <div class="bar-chart">
+          {% for item in chart_data %}
+          <div class="bar-column">
+            <div class="bar-value">{{ item.count }}</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-{{ item.color }}" style="height:{{ item.height }}%;" data-count="{{ item.count }}"></div>
+            </div>
+            <span>{{ item.label }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span><i class="dot-navy"></i> Students · {{ student_percentage }}%</span>
+      <span><i class="dot-gold"></i> Department head · {{ head_percentage }}%</span>
+      <span><i class="dot-purple"></i> Peer · {{ peer_percentage }}%</span>
+      <span><i class="dot-green"></i> Self · {{ self_percentage }}%</span>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="panel quick-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Quick actions</h2>
+        <p>Jump straight into your workflow</p>
+      </div>
+      <span class="heading-spark">✦</span>
+    </div>
+    <div class="quick-list">
+      {% if current_role == 'student' or user.is_superuser %}
+      <a href="{% url 'evaluation_create' 'student' %}" class="quick-action">
+        <span class="quick-icon icon-blue">A</span>
+        <span><strong>Student evaluation</strong><small>Evaluate course delivery and feedback</small></span>
+        <b>→</b>
+      </a>
+      {% endif %}
+      {% if current_role == 'department_head' or current_role == 'committee' or user.is_superuser %}
+      <a href="{% url 'evaluation_create' 'department_head' %}" class="quick-action">
+        <span class="quick-icon icon-gold">B</span>
+        <span><strong>Department head evaluation</strong><small>Competency, ethics and time management</small></span>
+        <b>→</b>
+      </a>
+      {% endif %}
+      {% if current_role == 'peer' or current_role == 'department_head' or current_role == 'committee' or user.is_superuser %}
+      <a href="{% url 'evaluation_create' 'peer' %}" class="quick-action">
+        <span class="quick-icon icon-purple">C</span>
+        <span><strong>Peer evaluation</strong><small>Professional and research contributions</small></span>
+        <b>→</b>
+      </a>
+      {% endif %}
+      {% if current_role == 'instructor' or user.is_superuser %}
+      <a href="{% url 'evaluation_create' 'self' %}" class="quick-action">
+        <span class="quick-icon icon-green">D</span>
+        <span><strong>Self-evaluation</strong><small>Reflect on teaching and professional growth</small></span>
+        <b>→</b>
+      </a>
+      {% endif %}
+      <a href="{% url 'administrative_create' %}" class="quick-action">
+        <span class="quick-icon icon-gold">6M</span>
+        <span><strong>Six-month review</strong><small>Results-based administrative evaluation</small></span>
+        <b>→</b>
+      </a>
+      <a href="{% url 'evaluation_summary' %}" class="quick-action">
+        <span class="quick-icon icon-green">E</span>
+        <span><strong>Open summary report</strong><small>View the weighted overall result</small></span>
+        <b>→</b>
+      </a>
+    </div>
+  </section>
+
+  <!-- Recent Evaluations -->
+  <section class="panel recent-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Recent evaluations</h2>
+        <p>Your latest submissions visible to this account</p>
+      </div>
+      <a href="{% url 'evaluation_list' %}" class="button button-outline button-small">View all records</a>
+    </div>
+    {% if recent_records %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Instructor</th>
+            <th>Form</th>
+            <th>Academic year</th>
+            <th>Date</th>
+            <th>Average rating</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for record in recent_records %}
+        <tr>
+          <td>
+            <div class="person-cell">
+              <span class="person-avatar">{{ record.staff.name|slice:":1"|upper }}</span>
+              <div>
+                <strong>{{ record.staff.name }}</strong>
+                <small>{{ record.staff.department|default:"Department not set" }}</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="form-chip chip-{{ record.form_type }}">{{ record.get_form_type_display }}</span>
+          </td>
+          <td>{{ record.academic_year|default:"—" }}</td>
+          <td>{{ record.evaluation_date|date:"M d, Y" }}</td>
+          <td>
+            <strong>{{ record.average_score|floatformat:2 }}</strong>
+            <span class="muted"> / 5</span>
+          </td>
+          <td>
+            <span class="status-pill status-submitted">{{ record.get_status_display }}</span>
+          </td>
+          <td>
+            <a href="{% url 'evaluation_detail' record.pk %}" class="table-link">Open ↗</a>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">▤</span>
+      <h3>No submissions to show yet</h3>
+      <p>When an evaluation is submitted, it will appear here.</p>
+      <a href="{% url 'evaluation_list' %}" class="text-link">Browse records →</a>
+    </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

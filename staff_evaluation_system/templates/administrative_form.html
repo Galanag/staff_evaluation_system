@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}የ6 ወር የአፈፃፀም ምዘና{% endblock %}
+{% block page_heading %}Six-month administrative evaluation{% endblock %}
+{% block content %}
+<div class="page-intro intro-row"><div><div class="eyebrow eyebrow-muted"><span class="eyebrow-dot"></span> ADMINISTRATIVE PERFORMANCE · FORM</div><h1>የ6 ወር የአፈፃፀም ምዘና ማጠቃለያ ቅጽ</h1><p>ለሠራተኛው የግማሽ ዓመት አፈፃፀም ግምገማ የሚሞላ ቅጽ።</p></div><div class="form-weight-card"><span>Maximum score</span><strong>100<small>%</small></strong><small>70 + 5 + 15 + 10</small></div>
+
+{% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+<form method="post" class="evaluation-form admin-evaluation-form">{% csrf_token %}
+  <section class="panel form-section"><div class="form-section-heading"><span class="section-index">01</span><div><h2>የሠራተኛው መረጃ · Employee information</h2><p>ሙሉ ስም፣ የሥራ መደብ፣ ደረጃ እና የሥራ ሂደት</p></div></div>
+  <div class="form-fields-grid">
+    <div class="field field-span-2">
+      <label for="id_staff">የሠራተኛው ሙሉ ስም ከነአያት · Full name *</label>{{ form.staff }}{% for e in form.staff.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+    <div class="field">
+      <label>የሥራ መደብ መጠሪያ · Job title</label>
+      <input type="text" id="staffJobTitle" value="" placeholder="Shown in staff directory" readonly>
+    </div>
+    <div class="field">
+      <label>ደረጃ · Grade</label>
+      <input type="text" id="staffGrade" value="" placeholder="Shown in staff directory" readonly>
+    </div>
+    <div class="field">
+      <label>የሥራ ሂደት መጠሪያ · Work process</label>
+      <input type="text" id="staffJobProcess" value="" placeholder="Shown in staff directory" readonly>
+    </div>
+    <div class="field">
+      <label>Department</label>
+      <input type="text" id="staffDepartment" value="" placeholder="Shown in staff directory" readonly>
+    </div>
+    <div class="field">
+      <label for="id_period_start">የምዘና ጊዜ ከ · Period from *</label>{{ form.period_start }}{% for e in form.period_start.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+    <div class="field">
+      <label for="id_period_end">እስከ · Period to *</label>{{ form.period_end }}{% for e in form.period_end.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+  </div>
+  <div class="helper-note"><span>ℹ</span> Job title, grade, work process and department are populated from the Staff Directory. Confirm the selected employee’s directory information before submitting.</div></section>
+
+  <section class="panel form-section"><div class="form-section-heading"><span class="section-index">02</span><div><h2>የውጤት ተኮር ዕቅድ አፈፃጸም</h2><p>Plan, actual achievements and weighted score</p></div><span class="max-score-pill">Maximum 70 points</span></div>
+  <div class="form-fields-grid">
+    <div class="field field-span-2">
+      <label for="id_plan_title">የዕቅዱ ርዕስ · Plan title</label>{{ form.plan_title }}
+    </div>
+    <div class="field field-span-2">
+      <label for="id_planned_outcomes">የታቀዱ ውጤቶች · Planned outcomes / targets</label>{{ form.planned_outcomes }}
+    </div>
+    <div class="field field-span-2">
+      <label for="id_actual_achievements">የተፈጸሙ ሥራዎች · Actual achievements</label>{{ form.actual_achievements }}
+    </div>
+    <div class="field field-score">
+      <label for="id_plan_execution_score">አፈፃጸምን ከዕቅድ ጋር በማነፃፀር · Plan execution (0–70)</label>
+      <div class="input-with-suffix">{{ form.plan_execution_score }}<span>/ 70</span></div>{% for e in form.plan_execution_score.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+    <div class="field">
+      <label for="id_performance_level">የአፈፃፀም ደረጃ · Performance level</label>{{ form.performance_level }}
+    </div>
+  </div></section>
+
+  <section class="panel form-section"><div class="form-section-heading"><span class="section-index">03</span><div><h2>ባህሪያት አፈፃፀም · Performance behaviours</h2><p>The source form allocates the 30-point behavioural component as self 5, team 15 and supervisor 10.</p></div><span class="max-score-pill">Maximum 30 points</span></div>
+  <div class="score-entry-grid">
+    <div class="score-entry">
+      <div class="score-entry-head">
+        <span class="score-avatar score-self">S</span>
+        <div><strong>በተመዛኙ የተሰጠ ውጤት</strong><small>Employee self-score</small></div>
+      </div>
+      <label for="id_employee_score">Score / 5</label>{{ form.employee_score }}{% for e in form.employee_score.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+    <div class="score-entry">
+      <div class="score-entry-head">
+        <span class="score-avatar score-team">T</span>
+        <div><strong>በቡድኑ የተሰጠ ውጤት</strong><small>Team score</small></div>
+      </div>
+      <label for="id_team_score">Score / 15</label>{{ form.team_score }}{% for e in form.team_score.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+    <div class="score-entry">
+      <div class="score-entry-head">
+        <span class="score-avatar score-supervisor">H</span>
+        <div><strong>በቅርብ ኃላፊ የተሰጠ ውጤት</strong><small>Immediate supervisor score</small></div>
+      </div>
+      <label for="id_supervisor_score">Score / 10</label>{{ form.supervisor_score }}{% for e in form.supervisor_score.errors %}<small class="field-error">{{ e }}</small>{% endfor %}
+    </div>
+  </div>
+  <div class="total-preview">
+    <div><span class="small-label">ግማሽ ዓመት የተጠቃለለ አፈፃጸም</span><p>Six-month aggregated performance (calculated automatically)</p></div>
+    <strong><span id="scorePlanPreview">0</span><small> / 100</small></strong>
+  </div>
+</section>
+
+<section class="panel form-section"><div class="form-section-heading"><span class="section-index">04</span><div><h2>ጠንካራ ጎኖች እና መሻሻል የሚገባቸው ክፍተቶች</h2><p>Strengths and improvement gaps</p></div></div>
+  <div class="form-fields-grid">
+    <div class="field field-span-2">
+      <label for="id_strengths">በአፈፃፀም ወቅት ሠራተኛው ያሳያቸው ጠንካራ ጎኖች</label>{{ form.strengths }}
+    </div>
+    <div class="field field-span-2">
+      <label for="id_improvement_gaps">በአፈፃፀም ወቅት ሠራተኛው የታዩበት መስተካከል የሚገባቸው ክፍተቶች</label>{{ form.improvement_gaps }}
+    </div>
+  </div></section>
+
+<section class="panel form-section"><div class="form-section-heading"><span class="section-index">05</span><div><h2>ስምምነት እና ፊርማ · Agreement & acknowledgement</h2><p>Typed names are recorded digitally. Print the form for wet signatures if required by the institution.</p></div></div>
+  <div class="signature-grid">
+    <div class="signature-column">
+      <h3>የቅርብ ኃላፊ · Immediate supervisor</h3>
+      <div class="field"><label for="id_supervisor_name">ሙሉ ስም</label>{{ form.supervisor_name }}</div>
+      <div class="field"><label for="id_supervisor_signature">ፊርማ / Typed name</label>{{ form.supervisor_signature }}</div>
+      <div class="field"><label for="id_supervisor_date">ቀን</label>{{ form.supervisor_date }}</div>
+    </div>
+    <div class="signature-column">
+      <h3>የሠራተኛው ማረጋገጫ · Employee acknowledgement</h3>
+      <div class="field"><label class="checkbox-field" for="id_employee_agreed">{{ form.employee_agreed }} በውጤት ተኮር አፈፃፀም ምዘና ውጤት ተስማምቻለሁ</label></div>
+      <div class="field"><label for="id_disagreement_reason">ካልተስማሙ ምክንያቱን ይግለጹ · Reason for disagreement</label>{{ form.disagreement_reason }}</div>
+      <div class="field"><label for="id_employee_signature">የሠራተኛው ስም / Typed name</label>{{ form.employee_signature }}</div>
+      <div class="field"><label for="id_employee_date">ቀን</label>{{ form.employee_date }}</div>
+    </div>
+  </div></section>
+
+<div class="form-footer"><a href="{% url 'administrative_list' %}" class="button button-outline">Cancel</a><div class="submit-note"><span>✓</span> Total is calculated as 70 + 5 + 15 + 10.</div><button type="submit" class="button button-primary button-large">Save six-month evaluation <span>→</span></button></div>
+
+{{ staff_directory_data|json_script:"staff-directory-data" }}
+</form>
+{% endblock %}

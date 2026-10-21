@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Staff directory{% endblock %}
+{% block page_heading %}Staff directory{% endblock %}
+{% block content %}
+<div class="page-intro intro-row"><div><div class="eyebrow eyebrow-muted"><span class="eyebrow-dot"></span> INSTITUTIONAL DIRECTORY</div><h1>Staff directory</h1><p>Manage instructor identity details used across academic and administrative evaluation forms.</p></div>{% if can_manage %}<a href="{% url 'staff_create' %}" class="button button-primary">+ Add staff member</a>{% endif %}</div>
+
+<!-- Import Panel -->
+{% if can_import %}
+<section class="panel import-panel">
+  <div class="import-icon">⇧</div>
+  <div class="import-copy">
+    <h2>Import staff from Excel</h2>
+    <p>Upload a workbook with an <code>employee_id</code> and <code>name</code> header. Optional columns: email, college, department, position, grade, job_process. Matching employee IDs are updated.</p>
+  </div>
+  <form method="post" action="{% url 'staff_import' %}" enctype="multipart/form-data" class="import-form">{% csrf_token %}
+    <input type="file" name="workbook" accept=".xlsx" required aria-label="Choose Excel workbook">
+    <button class="button button-outline" type="submit">Import .xlsx</button>
+  </form>
+</section>
+{% endif %}
+
+<!-- Filter Panel -->
+<section class="panel filter-panel">
+  <form method="get" class="filter-form">
+    <div class="field filter-search">
+      <label for="id_q">Search staff</label>
+      <input id="id_q" name="q" value="{{ query }}" placeholder="Name, ID or department…">
+    </div>
+    <div class="filter-actions">
+      <button class="button button-primary" type="submit">Search</button>
+      <a href="{% url 'staff_list' %}" class="button button-outline">Reset</a>
+    </div>
+  </form>
+</section>
+
+<!-- Table Panel -->
+<section class="panel table-panel">
+  <div class="panel-heading">
+    <div>
+      <h2>People</h2>
+      <p>{{ staff_members|length }} row(s) in this result</p>
+    </div>
+  </div>
+  {% if staff_members %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>College / Institute</th>
+          <th>Department</th>
+          <th>Job title</th>
+          <th>Grade</th>
+          <th>Account</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for staff in staff_members %}
+      <tr>
+        <td>
+          <div class="person-cell">
+            <span class="person-avatar">{{ staff.name|slice:":1"|upper }}</span>
+            <div>
+              <strong>{{ staff.name }}</strong>
+              <small>{{ staff.employee_id }}{% if staff.email %} · {{ staff.email }}{% endif %}</small>
+            </div>
+          </div>
+        </td>
+        <td>{{ staff.college }}</td>
+        <td>{{ staff.department|default:"—" }}</td>
+        <td>{{ staff.position|default:"—" }}</td>
+        <td>{{ staff.grade|default:"—" }}</td>
+        <td>{% if staff.linked_user %}<span class="status-pill status-submitted">{{ staff.linked_user.username }}</span>{% else %}<span class="muted">Not linked</span>{% endif %}</td>
+        <td>{% if staff.is_active %}<span class="status-pill status-submitted">Active</span>{% else %}<span class="status-pill status-draft">Inactive</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">♙</span>
+    <h3>No staff found</h3>
+    <p>Add a staff member or clear your search.</p>
+    {% if can_manage %}<a href="{% url 'staff_create' %}" class="button button-primary">Add staff member</a>{% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

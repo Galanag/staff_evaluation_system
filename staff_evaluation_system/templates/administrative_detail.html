@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Six-month evaluation detail{% endblock %}
+{% block page_heading %}Administrative record{% endblock %}
+{% block content %}
+<div class="page-intro intro-row no-print"><div><a href="{% url 'administrative_list' %}" class="back-link">← Back to administrative records</a><h1>የ6 ወር የአፈፃፀም ምዘና ማጠቃለያ ቅጽ</h1><p>Submitted {{ record.created_at|date:"M d, Y · H:i" }}</p></div><div class="intro-actions">{% if can_archive %}<a href="{% url 'archive_create' 'administrative' record.pk %}" class="button button-outline">Archive record</a>{% endif %}<button type="button" class="button button-outline" onclick="window.print()">⎙ Print form</button></div></div>
+
+<!-- Summary Hero -->
+<section class="summary-hero admin-summary-hero">
+  <div class="summary-identity">
+    <span class="detail-avatar">{{ record.staff.name|slice:":1"|upper }}</span>
+    <div>
+      <span class="small-label">EMPLOYEE PERFORMANCE REVIEW</span>
+      <h2>{{ record.staff.name }}</h2>
+      <p>{{ record.staff.position|default:"Job title not specified" }} · {{ record.staff.department|default:"Department not specified" }} · {{ record.staff.employee_id }}</p>
+      <p class="amharic-detail">የምዘና ጊዜ፡ {{ record.period_start|date:"Y-m-d" }} — {{ record.period_end|date:"Y-m-d" }}</p>
+    </div>
+  </div>
+  <div class="summary-total">
+    <small>ግማሽ ዓመት የተጠቃለለ አፈፃጸም · Total / 100</small>
+    <strong>{{ record.total_score|floatformat:2 }}<span>%</span></strong>
+    <div class="score-progress">
+      <span style="width:{{ record.total_score }}%"></span>
+    </div>
+    <small>{{ record.get_performance_level_display|default:"Level not selected" }}</small>
+  </div>
+</section>
+
+<!-- Details Section: Planned and Actual Results -->
+<section class="panel detail-section">
+  <div class="panel-heading">
+    <div><h2>የውጤት ተኮር ዕቅድ አፈፃፀም</h2><p>Planned and actual results</p></div>
+  </div>
+  <span class="max-score-pill">{{ record.plan_execution_score|floatformat:2 }} / 70</span>
+  <div class="detail-meta-grid">
+    <div class="meta-item"><small>Plan title</small><strong>{{ record.plan_title|default:"—" }}</strong></div>
+    <div class="meta-item"><small>Period start</small><strong>{{ record.period_start|date:"M d, Y" }}</strong></div>
+    <div class="meta-item"><small>Period end</small><strong>{{ record.period_end|date:"M d, Y" }}</strong></div>
+    <div class="meta-item"><small>Employee grade</strong><strong>{{ record.staff.grade|default:"—" }}</strong></div>
+    <div class="meta-item"><small>Work process</strong><strong>{{ record.staff.job_process|default:"—" }}</strong></div>
+    <div class="meta-item"><small>College / School</strong><strong>{{ record.staff.college }}</strong></div>
+  </div>
+  <div class="comment-grid">
+    <div class="comment-block">
+      <div><h3>የታቀዱ ውጤች · Planned outcomes</h3><p>{{ record.planned_outcomes|default:"—"|linebreaksbr }}</p></div>
+    </div>
+    <div class="comment-block">
+      <div><h3>የተፈጸሙ ሥራዎች · Actual achievements</h3><p>{{ record.actual_achievements|default:"—"|linebreaksbr }}</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Details Section: Performance Behaviours -->
+<section class="panel detail-section">
+  <div class="panel-heading">
+    <div><h2>ባህሪያት አፈፃፀም</h2><p>Performance behaviours · maximum 30 points</p></div>
+  </div>
+  <div class="score-entry-grid">
+    <div class="score-entry">
+      <div class="score-entry-head">
+        <span class="score-avatar score-self">S</span>
+        <div><strong>በተመዛኙ የተሰጠ ውጤት</strong><small>Employee self-score</small></div>
+      </div>
+      <div class="detail-score-value">{{ record.employee_score|floatformat:2 }} <small>/ 5</small></div>
+    </div>
+    <div class="score-entry">
+      <div class="score-entry-head">
+        <span class="score-avatar score-team">T</span>
+        <div><strong>በቡድኑ የተሰጠ ውጤት</strong><small>Team score</small></div>
+      </div>
+      <div class="detail-score-value">{{ record.team_score|floatformat:2 }} <small>/ 15</small></div>
+    </div>
+    <div class="score-entry">
+      <div class="score-entry-head">
+        <span class="score-avatar score-supervisor">H</span>
+        <div><strong>በቅርብ ኃላፊ የተሰጠ ውጤት</strong><small>Supervisor score</small></div>
+      </div>
+      <div class="detail-score-value">{{ record.supervisor_score|floatformat:2 }} <small>/ 10</small></div>
+    </div>
+  </div>
+  <div class="total-preview">
+    <div><span class="small-label">TOTAL SCORE</span><p>Plan execution plus behaviour score components</p></div>
+    <strong>{{ record.total_score|floatformat:2 }}<small> / 100</small></strong>
+  </div>
+</section>
+
+<!-- Details Section: Strengths, Gaps, and Signatures -->
+<section class="panel detail-section">
+  <div class="panel-heading">
+    <div><h2>የአፈፃፀም አስተያየት</h2><p>Strengths, opportunities and acknowledgement</p></div>
+  </div>
+  <div class="comment-grid">
+    <div class="comment-block">
+      <span class="comment-icon icon-green">↗</span>
+      <div>
+        <h3>ጠንካራ ጎኖች · Strengths</h3>
+        <p>{{ record.strengths|default:"—"|linebreaksbr }}</p>
+      </div>
+    </div>
+    <div class="comment-block">
+      <span class="comment-icon icon-gold">✦</span>
+      <div>
+        <h3>መሻሻል የሚገባቸው ክፍተቶች · Improvement gaps</h3>
+        <p>{{ record.improvement_gaps|default:"—"|linebreaksbr }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="signature-grid">
+    <div class="signature-column">
+      <h3>የቅርብ ኃላፊ · Supervisor</h3>
+      <p><strong>ሙሉ ስም:</strong> {{ record.supervisor_name|default:"—" }}</p>
+      <p><strong>ፊርማ:</strong> {{ record.supervisor_signature|default:"—" }}</p>
+      <p><strong>ቀን:</strong> {{ record.supervisor_date|date:"M d, Y"|default:"—" }}</p>
+    </div>
+    <div class="signature-column">
+      <h3>የሠራተኛው ማረጋገጫ · Employee acknowledgement</h3>
+      <p><strong>ተስማምቻለሁ:</strong> {% if record.employee_agreed %}Agreed{% else %}Disagreed{% endif %}</p>
+      <p><strong>ምክንያቱ:</strong> {{ record.disagreement_reason|default:"—" }}</p>
+      <p><strong>ስም / ፊርማ:</strong> {{ record.employee_signature|default:"—" }}</p>
+      <p><strong>ቀን:</strong> {{ record.employee_date|date:"M d, Y"|default:"—" }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

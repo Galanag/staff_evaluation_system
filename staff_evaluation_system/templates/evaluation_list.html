@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}Academic evaluation records{% endblock %}
+{% block page_heading %}Academic records{% endblock %}
+{% block content %}
+<div class="page-intro intro-row"><div><div class="eyebrow eyebrow-muted"><span class="eyebrow-dot"></span> RECORDS REGISTER</div><h1>Academic evaluation records</h1><p>Search, filter and open submitted Forms A–D.</p></div>{% if can_export %}<a class="button button-primary" href="{% url 'export_evaluations' %}?form_type={{ form_type_filter|urlencode }}&year={{ year_filter|urlencode }}&status={{ status_filter|urlencode }}&q={{ query|urlencode }}">⇩ Export Excel</a>{% endif %}</div>
+
+<!-- Filter Panel -->
+<section class="panel filter-panel">
+  <form method="get" class="filter-form">
+    <div class="field filter-search">
+      <label for="id_q">Search</label>
+      <input id="id_q" name="q" value="{{ query }}" placeholder="Instructor, employee ID, course…">
+    </div>
+    <div class="field">
+      <label for="id_form_type">Form type</label>
+      <select name="form_type" id="id_form_type">
+        <option value="">All forms</option>
+        <option value="student" {% if form_type_filter == 'student' %}selected{% endif %}>Form A · Students</option>
+        <option value="department_head" {% if form_type_filter == 'department_head' %}selected{% endif %}>Form B · Department head</option>
+        <option value="peer" {% if form_type_filter == 'peer' %}selected{% endif %}>Form C · Peer</option>
+        <option value="self" {% if form_type_filter == 'self' %}selected{% endif %}>Form D · Self</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="id_year">Academic year</label>
+      <input id="id_year" name="year" value="{{ year_filter }}" placeholder="e.g. 2018 E.C.">
+    </div>
+    <div class="field">
+      <label for="id_status">Status</label>
+      <select name="status" id="id_status">
+        <option value="">All statuses</option>
+        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+        <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="button button-primary" type="submit">Apply filters</button>
+      <a href="{% url 'evaluation_list' %}" class="button button-outline">Reset</a>
+    </div>
+  </form>
+</section>
+
+<!-- Table Panel -->
+<section class="panel table-panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Evaluation register</h2>
+      <p>Showing up to 400 filtered rows</p>
+    </div>
+    <span class="result-count">Records shown <strong>{{ records|length }}</strong></span>
+  </div>
+  {% if records %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Instructor</th>
+          <th>Evaluator form</th>
+          <th>Academic year</th>
+          <th>Course</th>
+          <th>Date submitted</th>
+          <th>Rating</th>
+          <th>Weighted result</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for record in records %}
+      <tr>
+        <td>
+          <div class="person-cell">
+            <span class="person-avatar">{{ record.staff.name|slice:":1"|upper }}</span>
+            <div>
+              <strong>{{ record.staff.name }}</strong>
+              <small>{{ record.staff.employee_id }} · {{ record.staff.department|default:"No department" }}</small>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="form-chip chip-{{ record.form_type }}">{{ record.get_form_type_display }}</span>
+        </td>
+        <td>{{ record.academic_year|default:"—" }}</td>
+        <td>
+          <strong>{{ record.course_title|default:"—" }}</strong>
+          <small class="table-subtext">{{ record.course_code }}</small>
+        </td>
+        <td>{{ record.evaluation_date|date:"M d, Y" }}</td>
+        <td>
+          <strong>{{ record.average_score|floatformat:2 }}</strong>
+          <span class="muted"> / 5</span>
+        </td>
+        <td>
+          <strong>{{ record.weighted_score|floatformat:2 }}</strong>
+          <span class="muted"> / {{ record.weight }}</span>
+        </td>
+        <td>
+          <span class="status-pill status-submitted">{{ record.get_status_display }}</span>
+        </td>
+        <td>
+          <a href="{% url 'evaluation_detail' record.pk %}" class="table-link">Open ↗</a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">⌕</span>
+    <h3>No records match these filters</h3>
+    <p>Try changing the form type, academic year or search term.</p>
+    <a href="{% url 'evaluation_list' %}" class="button button-outline">Clear filters</a>
+  </div>
+  {% endif %}
+{% endblock %}

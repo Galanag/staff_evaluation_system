@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Sign in{% endblock %}
+{% block public_content %}
+<main class="auth-wrap"><section class="auth-aside"><div class="eyebrow"><span class="eyebrow-dot"></span> AMBO UNIVERSITY</div><h1>Your work.<br><em>Your impact.</em></h1><p>Sign in to submit evaluations, review performance records and support continuous improvement.</p><div class="auth-aside-bottom"><div class="auth-mini-mark">AU</div><span>Learning for change</span></div></section><section class="auth-card"><div class="auth-heading"><span class="small-label">WELCOME BACK</span><h2>Sign in to your workspace</h2><p>Enter your account details to continue.</p></div>
+  {% if form.errors %}<div class="alert alert-error">Please check your username and password and try again.</div>{% endif %}
+  <form method="post" class="stack-form">{% csrf_token %}<div class="field"><label for="id_username">Username</label><input id="id_username" name="username" type="text" autocomplete="username" required autofocus placeholder="Enter your username"></div><div class="field"><div class="label-row"><label for="id_password">Password</label></div><input id="id_password" name="password" type="password" autocomplete="current-password" required placeholder="Enter your password"></div>{% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}<button class="button button-primary button-full button-large" type="submit">Sign in <span>→</span></button></form>
+  <p class="auth-switch">New to the workspace? <a href="{% url 'signup' %}">Create an account</a></p><div class="auth-note"><span>🔒</span> Your account and evaluation records are access-controlled.</div>
+</section></main>
+{% endblock %}

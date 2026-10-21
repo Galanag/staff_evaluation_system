@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block page_heading %}{{ form_title }}{% endblock %}
+{% block content %}
+<div class="page-intro"><div><div class="eyebrow eyebrow-muted"><span class="eyebrow-dot"></span> ACADEMIC EVALUATION FORM</div><h1>{{ form_title }}</h1><p>Complete the details below, rate each criterion and submit when finished.</p></div><div class="form-weight-card"><span>Contribution weight</span><strong>{{ weight }}<small>%</small></strong><small>Form E weighting</small></div></div>
+
+{% if setup_message %}<div class="alert alert-warning">{{ setup_message }}</div>{% endif %}{% if error_message %}<div class="alert alert-error"><strong>Check your form</strong> {{ error_message }}</div>{% endif %}
+<form method="post" class="evaluation-form" id="academicEvaluationForm">{% csrf_token %}
+  <section class="panel form-section"><div class="form-section-heading"><span class="section-index">01</span><div><h2>Evaluation details</h2><p>Identification and evaluation period</p></div></div><div class="form-fields-grid">
+    <div class="field field-span-2">
+      <label for="id_staff">Instructor's full name <span class="required">*</span></label>
+      <select id="id_staff" name="staff_id" required>
+        <option value="">Choose an instructor</option>
+        {% for staff in staff_members %}
+        <option value="{{ staff.pk }}" {% if selected_staff_id|stringformat:'s' == staff.pk|stringformat:'s' %}selected{% endif %}>{{ staff.name }} · {{ staff.employee_id }}{% if staff.department %} · {{ staff.department }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="id_college">College / Institute / School</label>
+      <input id="id_college" name="college" value="{{ post_values.college|default:'Ambo University' }}" placeholder="College, institute or school">
+    </div>
+    <div class="field">
+      <label for="id_department">Department</label>
+      <input id="id_department" name="department" value="{{ post_values.department|default:'' }}" placeholder="Department name">
+    </div>
+    <div class="field">
+      <label for="id_course_title">Course title</label>
+      <input id="id_course_title" name="course_title" value="{{ post_values.course_title|default:'' }}" placeholder="Course title">
+    </div>
+    <div class="field">
+      <label for="id_course_code">Course code</label>
+      <input id="id_course_code" name="course_code" value="{{ post_values.course_code|default:'' }}" placeholder="e.g. CENG 201">
+    </div>
+    <div class="field">
+      <label for="id_academic_year">Academic year</label>
+      <input id="id_academic_year" name="academic_year" value="{{ post_values.academic_year|default:'' }}" placeholder="e.g. 2018 E.C. / 2025–26">
+    </div>
+    <div class="field">
+      <label for="id_evaluation_date">Date of evaluation <span class="required">*</span></label>
+      <input type="date" id="id_evaluation_date" name="evaluation_date" value="{{ post_values.evaluation_date|default:today }}" required>
+    </div>
+  </div></section>
+
+  <section class="panel form-section"><div class="form-section-heading"><span class="section-index">02</span><div><h2>Evaluation criteria</h2><p>Select one rating for each item. N/A is excluded from the mean.</p></div><div class="rating-legend"><span>5 = Highest</span><span>0 = Lowest</span><span>N/A = Not applicable</span></div></div>
+  {% for category in catalog %}
+  <div class="criterion-group">
+    <div class="criterion-group-heading"><span class="category-marker">{{ forloop.counter|stringformat:'02d' }}</span><h3>{{ category.title }}</h3><span class="criterion-count">{{ category.items|length }} criteria</span></div>
+    <div class="criteria-list">
+    {% for item in category.items %}
+    <div class="criterion-row">
+      <div class="criterion-question">
+        <span class="criterion-number">{{ forloop.counter|stringformat:'02d' }}</span>
+        <span>{{ item.text }}</span>
+      </div>
+      <div class="rating-options" role="radiogroup" aria-label="Rating for {{ item.text }}">
+      {% for option,label in rating_options %}
+        <label class="rating-choice {% if option == 'NA' %}rating-na{% endif %}" title="{{ label }}">
+          <input type="radio" name="rating_{{ item.key }}" value="{{ option }}" {% if item.selected == option %}checked{% endif %} required>
+          <span>{{ label }}</span>
+        </label>
+      {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  </section>
+
+  <section class="panel form-section"><div class="form-section-heading"><span class="section-index">03</span><div><h2>Overall comments</h2><p>Capture actionable, specific observations.</p></div></div>
+    <div class="form-fields-grid">
+      <div class="field field-span-2">
+        <label for="id_strengths">Strengths of the instructor</label>
+        <textarea id="id_strengths" name="strengths" rows="4" placeholder="Describe the instructor's key strengths…">{{ post_values.strengths|default:'' }}</textarea>
+      </div>
+      <div class="field field-span-2">
+        <label for="id_improvements">Suggested points / aspects to improve</label>
+        <textarea id="id_improvements" name="improvements" rows="4" placeholder="Describe practical opportunities for improvement…">{{ post_values.improvements|default:'' }}</textarea>
+      </div>
+    </div></section>
+
+  <div class="form-footer"><a href="{% url 'evaluation_list' %}" class="button button-outline">Cancel</a><div class="submit-note"><span>🔒</span> Submission is saved to the evaluation register.</div><button type="submit" class="button button-primary button-large">Submit evaluation <span>→</span></button></div>
+
+  {{ staff_directory_data|json_script:"staff-directory-data" }}
+  {% if error_message %}<div class="alert alert-error">{{ error_message }}</div>{% endif %}
+  {% if setup_message %}<div class="alert alert-warning">{{ setup_message }}</div>{% endif %}
+</form>
+{% endblock %}
