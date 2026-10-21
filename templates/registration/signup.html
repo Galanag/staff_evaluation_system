@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Create account{% endblock %}
+{% block public_content %}
+<main class="auth-wrap signup-wrap"><section class="auth-aside"><div class="eyebrow"><span class="eyebrow-dot"></span> JOIN THE WORKSPACE</div><h1>Build a culture of <em>better feedback.</em></h1><p>Create a basic account to get started. Privileged roles are assigned by the system administrator for security.</p><div class="auth-aside-bottom"><div class="auth-mini-mark">AU</div><span>Learning for change</span></div></section><section class="auth-card"><div class="auth-heading"><span class="small-label">GET STARTED</span><h2>Create your account</h2><p>Use your institution details where possible.</p></div>
+<form method="post" class="stack-form">{% csrf_token %}{% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+<div class="field"><label for="id_username">Username</label>{{ form.username }}{% for e in form.username.errors %}<small class="field-error">{{ e }}</small>{% endfor %}</div>
+<div class="field-grid"><div class="field"><label for="id_first_name">First name</label>{{ form.first_name }}{% for e in form.first_name.errors %}<small class="field-error">{{ e }}</small>{% endfor %}</div><div class="field"><label for="id_last_name">Last name</label>{{ form.last_name }}{% for e in form.last_name.errors %}<small class="field-error">{{ e }}</small>{% endfor %}</div></div>
+<div class="field"><label for="id_email">Email address</label>{{ form.email }}{% for e in form.email.errors %}<small class="field-error">{{ e }}</small>{% endfor %}</div>
+<div class="field"><label for="id_account_type">Registering as</label>{{ form.account_type }}</div>
+<div class="field"><label for="id_password1">Password</label>{{ form.password1 }}{% for e in form.password1.errors %}<small class="field-error">{{ e }}</small>{% endfor %}</div>
+<div class="field"><label for="id_password2">Confirm password</label>{{ form.password2 }}{% for e in form.password2.errors %}<small class="field-error">{{ e }}</small>{% endfor %}</div>
+<button class="button button-primary button-full button-large" type="submit">Create account <span>→</span></button></form><p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Sign in</a></p><div class="auth-note"><span>ℹ</span> Department head, peer, committee and oversight permissions must be assigned by an administrator.</div>
+</section></main>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block title %}Access restricted{% endblock %}
+{% block page_heading %}Access restricted{% endblock %}
+{% block content %}<div class="empty-state forbidden-state"><span class="empty-icon">⌁</span><h1>Access restricted</h1><p>Your account does not have permission to open this page or submit this form. Ask the system administrator to review your assigned role.</p><a href="{% url 'dashboard' %}" class="button button-primary">Back to dashboard</a></div>{% endblock %}
