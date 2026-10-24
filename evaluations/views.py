@@ -96,7 +96,7 @@ def visible_archive_entries(user):
 def can_create_form(user, form_type):
     role = get_role(user)
     allowed = {
-        "student": {"student"},
+        "student": {"department_head", "committee"},
         "department_head": {"department_head", "committee"},
         "peer": {"peer", "department_head", "committee"},
         "self": {"instructor"},
@@ -329,6 +329,87 @@ def evaluation_detail(request, pk):
         "record": record, "catalog": catalog, "form_title": FORM_TITLES[record.form_type],
         "weight": record.weight, "weighted_score": record.weighted_score,
         "can_archive": can_archive(request.user),
+    })
+
+
+@login_required
+def evaluation_update(request, pk):
+    record = get_object_or_404(visible_evaluations(request.user), pk=pk)
+    catalog = get_catalog(record.form_type)
+    selected_ratings = {}
+    for category in catalog:
+        for item in category["items"]:
+            item["selected"] = record.ratings.get(item["key"], "") if record.ratings else ""
+            selected_ratings[item["key"]] = item["selected"]
+
+    error_message = ""
+    if request.method == "POST":
+        staff_id = request.POST.get("staff_id")
+        staff = StaffMember.objects.filter(pk=staff_id).first() if staff_id else record.staff
+        if not staff:
+            error_message = "Select a valid staff member."
+        else:
+            submitted_ratings = {}
+            missing = []
+            for category in catalog:
+                for item in category["items"]:
+                    name = "rating_" + item["key"]
+                    selected = request.POST.get(name, "").strip()
+                    selected_ratings[item["key"]] = selected
+                    if selected not in {"5", "4", "3", "2", "1", "0", "NA"}:
+                        missing.append(item["key"])
+                    else:
+                        submitted_ratings[item["key"]] = selected
+            if missing and not request.POST.get("strengths") and not request.POST.get("improvements"):
+                error_message = f"Please answer all rating items before submitting. {len(missing)} item(s) remain unanswered."
+            else:
+                eval_date = parse_date(request.POST.get("evaluation_date", "")) or timezone.localdate()
+                period_start = parse_date(request.POST.get("period_start", ""))
+                period_end = parse_date(request.POST.get("period_end", ""))
+                academic_year = request.POST.get("academic_year", "").strip()
+                if period_start and period_end and period_end < period_start:
+                    error_message = "The evaluation end date must not be earlier than its start date."
+                else:
+                    record.staff = staff
+                    record.evaluator = request.user
+                    record.college = request.POST.get("college", staff.college).strip() or staff.college
+                    record.department = request.POST.get("department", staff.department).strip() or staff.department
+                    record.course_title = request.POST.get("course_title", "").strip()
+                    record.course_code = request.POST.get("course_code", "").strip()
+                    record.academic_year = academic_year
+                    record.batch = request.POST.get("batch", "")
+                    record.semester = request.POST.get("semester", "")
+                    record.evaluation_date = eval_date
+                    record.period_start = period_start
+                    record.period_end = period_end
+                    record.ratings = submitted_ratings if submitted_ratings else record.ratings
+                    record.average_score = average_rating(submitted_ratings) if submitted_ratings else record.average_score
+                    record.strengths = request.POST.get("strengths", "").strip()
+                    record.improvements = request.POST.get("improvements", "").strip()
+                    record.status = request.POST.get("status", "submitted")
+                    record.save()
+                    messages.success(request, "Evaluation updated successfully.")
+                    return redirect("evaluation_detail", pk=record.pk)
+
+    for category in catalog:
+        for item in category["items"]:
+            item["selected"] = selected_ratings.get(item["key"], "")
+
+    return render(request, "evaluation_form.html", {
+        "form_type": record.form_type,
+        "form_title": FORM_TITLES[record.form_type],
+        "weight": record.weight,
+        "catalog": catalog,
+        "staff_members": StaffMember.objects.filter(is_active=True).order_by("name"),
+        "rating_options": RATING_OPTIONS,
+        "error_message": error_message,
+        "setup_message": "",
+        "selected_ratings": selected_ratings,
+        "today": timezone.localdate().isoformat(),
+        "form_metadata": record.form_type in {"student", "department_head", "peer", "self"},
+        "selected_staff_id": record.staff.pk,
+        "staff_directory_data": staff_directory_data(StaffMember.objects.filter(is_active=True)),
+        "post_values": {},
     })
 
 
@@ -621,6 +702,48 @@ def administrative_list(request):
 def administrative_detail(request, pk):
     record = get_object_or_404(visible_administrative_evaluations(request.user), pk=pk)
     return render(request, "administrative_detail.html", {"record": record, "can_archive": can_archive(request.user)})
+
+
+@login_required
+def administrative_update(request, pk):
+    record = get_object_or_404(visible_administrative_evaluations(request.user), pk=pk)
+
+    if request.method == "POST":
+        staff = get_object_or_404(StaffMember, pk=request.POST.get("staff"))
+        record.staff = staff
+        record.period_start = parse_date(request.POST.get("period_start", ""))
+        record.period_end = parse_date(request.POST.get("period_end", ""))
+        record.plan_title = request.POST.get("plan_title", "").strip()
+        record.planned_outcomes = request.POST.get("planned_outcomes", "").strip()
+        record.actual_achievements = request.POST.get("actual_achievements", "").strip()
+        record.plan_execution_score = Decimal(request.POST.get("plan_execution_score", "0"))
+        record.employee_score = Decimal(request.POST.get("employee_score", "0"))
+        record.team_score = Decimal(request.POST.get("team_score", "0"))
+        record.supervisor_score = Decimal(request.POST.get("supervisor_score", "0"))
+        record.performance_level = request.POST.get("performance_level", "good")
+        record.strengths = request.POST.get("strengths", "").strip()
+        record.improvement_gaps = request.POST.get("improvement_gaps", "").strip()
+        record.supervisor_name = request.POST.get("supervisor_name", "").strip()
+        record.supervisor_signature = request.POST.get("supervisor_signature", "").strip()
+        sup_date = request.POST.get("supervisor_date", "")
+        record.supervisor_date = parse_date(sup_date) if sup_date else None
+        record.employee_agreed = bool(request.POST.get("employee_agreed"))
+        record.disagreement_reason = request.POST.get("disagreement_reason", "").strip()
+        record.employee_signature = request.POST.get("employee_signature", "").strip()
+        emp_date = request.POST.get("employee_date", "")
+        record.employee_date = parse_date(emp_date) if emp_date else None
+        record.evaluator = request.user
+        record.status = "submitted"
+        record.save()
+        messages.success(request, "Administrative evaluation updated successfully.")
+        return redirect("administrative_detail", pk=record.pk)
+
+    return render(request, "administrative_form.html", {
+        "form": AdministrativeEvaluationForm(instance=record),
+        "is_edit": True,
+        "record": record,
+        "staff_directory_data": staff_directory_data(StaffMember.objects.filter(is_active=True)),
+    })
 
 
 @login_required
